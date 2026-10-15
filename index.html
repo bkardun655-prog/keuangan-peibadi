@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catatan Keuangan Pribadi</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 16px;
+    color: #333;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  header h1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  /* Kartu Saldo */
+  .saldo-card {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 20px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .saldo-card .label {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .saldo-card .amount {
+    font-size: 32px;
+    font-weight: 700;
+    word-break: break-all;
+  }
+
+  /* Ringkasan */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .summary-item {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .summary-item .label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .summary-item .value {
+    font-size: 16px;
+    font-weight: 700;
+    word-break: break-all;
+  }
+
+  .income-color { color: #10b981; }
+  .expense-color { color: #ef4444; }
+
+  /* Form */
+  .form-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+  }
+
+  .form-card h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+    color: #333;
+  }
+
+  .type-toggle {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 14px;
+  }
+
+  .type-toggle button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .type-toggle button.active-income {
+    background: #10b981;
+    color: #fff;
+  }
+
+  .type-toggle button.active-expense {
+    background: #ef4444;
+    color: #fff;
+  }
+
+  .input-group {
+    margin-bottom: 12px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: border 0.2s;
+    background: #f8fafc;
+  }
+
+  .input-group input:focus,
+  .input-group select:focus {
+    border-color: #667eea;
+    background: #fff;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .btn-submit:active {
+    transform: scale(0.98);
+  }
+
+  /* Riwayat */
+  .riwayat-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .riwayat-card h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+    color: #333;
+  }
+
+  .transaksi-list {
+    list-style: none;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .transaksi-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .transaksi-item:last-child {
+    border-bottom: none;
+  }
+
+  .transaksi-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 10px;
+  }
+
+  .transaksi-ket {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .transaksi-tgl {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  .transaksi-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .transaksi-jumlah {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .btn-hapus {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: 30px 0;
+    font-size: 14px;
+  }
+
+  /* Scrollbar */
+  .transaksi-list::-webkit-scrollbar {
+    width: 4px;
+  }
+  .transaksi-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>💰 Catatan Keuangan Pribadi</h1>
+  </header>
+
+  <!-- Kartu Saldo -->
+  <div class="saldo-card">
+    <div class="label">Total Saldo</div>
+    <div class="amount" id="totalSaldo">Rp 0</div>
+  </div>
+
+  <!-- Ringkasan -->
+  <div class="summary">
+    <div class="summary-item">
+      <div class="label">Total Pemasukan</div>
+      <div class="value income-color" id="totalMasuk">Rp 0</div>
+    </div>
+    <div class="summary-item">
+      <div class="label">Total Pengeluaran</div>
+      <div class="value expense-color" id="totalKeluar">Rp 0</div>
+    </div>
+  </div>
+
+  <!-- Form Input -->
+  <div class="form-card">
+    <h2>Tambah Transaksi</h2>
+
+    <div class="type-toggle">
+      <button id="btnMasuk" class="active-income" onclick="setTipe('masuk')">Pemasukan</button>
+      <button id="btnKeluar" onclick="setTipe('keluar')">Pengeluaran</button>
+    </div>
+
+    <div class="input-group">
+      <label for="keterangan">Keterangan</label>
+      <input type="text" id="keterangan" placeholder="Contoh: Gaji, Makan siang..." maxlength="50">
+    </div>
+
+    <div class="input-group">
+      <label for="jumlah">Jumlah (Rp)</label>
+      <input type="number" id="jumlah" placeholder="Contoh: 50000" min="1" inputmode="numeric">
+    </div>
+
+    <div class="input-group">
+      <label for="kategori">Kategori</label>
+      <select id="kategori">
+        <option value="Umum">Umum</option>
+        <option value="Makanan">Makanan</option>
+        <option value="Transportasi">Transportasi</option>
+        <option value="Belanja">Belanja</option>
+        <option value="Gaji">Gaji</option>
+        <option value="Hiburan">Hiburan</option>
+        <option value="Tagihan">Tagihan</option>
+        <option value="Lainnya">Lainnya</option>
+      </select>
+    </div>
+
+    <button class="btn-submit" onclick="tambahTransaksi()">+ Simpan Transaksi</button>
+  </div>
+
+  <!-- Riwayat -->
+  <div class="riwayat-card">
+    <h2>📋 Riwayat Transaksi</h2>
+    <ul class="transaksi-list" id="listTransaksi">
+      <li class="empty">Belum ada transaksi</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // ===== Variabel Global =====
+  let tipeTransaksi = 'masuk';
+  let transaksi = JSON.parse(localStorage.getItem('keuanganData')) || [];
+
+  // ===== Format Rupiah =====
+  function formatRupiah(angka) {
+    return 'Rp ' + Number(angka).toLocaleString('id-ID');
+  }
+
+  // ===== Set Tipe (Pemasukan/Pengeluaran) =====
+  function setTipe(tipe) {
+    tipeTransaksi = tipe;
+    const btnMasuk = document.getElementById('btnMasuk');
+    const btnKeluar = document.getElementById('btnKeluar');
+
+    btnMasuk.className = tipe === 'masuk' ? 'active-income' : '';
+    btnKeluar.className = tipe === 'keluar' ? 'active-expense' : '';
+  }
+
+  // ===== Tambah Transaksi =====
+  function tambahTransaksi() {
+    const keterangan = document.getElementById('keterangan').value.trim();
+    const jumlah = parseInt(document.getElementById('jumlah').value);
+    const kategori = document.getElementById('kategori').value;
+
+    // Validasi
+    if (!keterangan) {
+      alert('Keterangan tidak boleh kosong!');
+      return;
+    }
+    if (!jumlah || jumlah <= 0) {
+      alert('Jumlah harus berupa angka lebih dari 0!');
+      return;
+    }
+
+    // Simpan transaksi
+    const dataBaru = {
+      id: Date.now(),
+      tipe: tipeTransaksi,
+      keterangan: keterangan,
+      jumlah: jumlah,
+      kategori: kategori,
+      tanggal: new Date().toISOString()
+    };
+
+    transaksi.unshift(dataBaru);
+    simpanData();
+    renderSemua();
+
+    // Reset form
+    document.getElementById('keterangan').value = '';
+    document.getElementById('jumlah').value = '';
+    document.getElementById('keterangan').focus();
+  }
+
+  // ===== Hapus Transaksi =====
+  function hapusTransaksi(id) {
+    if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
+    transaksi = transaksi.filter(t => t.id !== id);
+    simpanData();
+    renderSemua();
+  }
+
+  // ===== Simpan ke localStorage =====
+  function simpanData() {
+    localStorage.setItem('keuanganData', JSON.stringify(transaksi));
+  }
+
+  // ===== Format Tanggal =====
+  function formatTanggal(isoString) {
+    const d = new Date(isoString);
+    const opsi = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return d.toLocaleDateString('id-ID', opsi);
+  }
+
+  // ===== Render Semua (Saldo + Riwayat) =====
+  function renderSemua() {
+    let totalMasuk = 0;
+    let totalKeluar = 0;
+
+    transaksi.forEach(t => {
+      if (t.tipe === 'masuk') totalMasuk += t.jumlah;
+      else totalKeluar += t.jumlah;
+    });
+
+    const saldo = totalMasuk - totalKeluar;
+
+    document.getElementById('totalSaldo').textContent = formatRupiah(saldo);
+    document.getElementById('totalMasuk').textContent = formatRupiah(totalMasuk);
+    document.getElementById('totalKeluar').textContent = formatRupiah(totalKeluar);
+
+    // Render riwayat
+    const list = document.getElementById('listTransaksi');
+
+    if (transaksi.length === 0) {
+      list.innerHTML = '<li class="empty">Belum ada transaksi</li>';
+      return;
+    }
+
+    list.innerHTML = transaksi.map(t => {
+      const isMasuk = t.tipe === 'masuk';
+      const tanda = isMasuk ? '+' : '-';
+      const warna = isMasuk ? 'income-color' : 'expense-color';
+
+      return `
+        <li class="transaksi-item">
+          <div class="transaksi-info">
+            <div class="transaksi-ket">${escapeHtml(t.keterangan)}</div>
+            <div class="transaksi-tgl">${t.kategori} • ${formatTanggal(t.tanggal)}</div>
+          </div>
+          <div class="transaksi-right">
+            <div class="transaksi-jumlah ${warna}">${tanda} ${formatRupiah(t.jumlah)}</div>
+            <button class="btn-hapus" onclick="hapusTransaksi(${t.id})">Hapus</button>
+          </div>
+        </li>
+      `;
+    }).join('');
+  }
+
+  // ===== Keamanan: Escape HTML =====
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ===== Enter key untuk submit =====
+  document.getElementById('jumlah').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') tambahTransaksi();
+  });
+  document.getElementById('keterangan').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') document.getElementById('jumlah').focus();
+  });
+
+  // ===== Render pertama kali =====
+  renderSemua();
+</script>
+</body>
+</html>
